@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Railway Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    h2{
+        text-align: center;
+
+    }
+
+    #map {
+      height: 400px;
+      width: 100%;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .card, table {
+      background: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 12px 15px;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background: #007bff;
+      color: white;
+    }
+
+    .status-open { color: green; font-weight: bold; }
+    .status-closed { color: red; font-weight: bold; }
+
+    @media screen and (max-width: 600px) {
+      .card, table, #map {
+        width: 100%;
+        font-size: 14px;
+      }
+    }
+  </style>
+  
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+</head>
+<body>
+
+  <h1>🚦 Smart railway crossing </h1> <br>
+  <!-- <h2>  BY HARSH GUNDA 😎</h2> -->
+
+ 
+  <div id="map"></div>
+
+   -->
+  <div class="card">
+    <h2>Featured Train</h2>
+    <p><strong>Name:</strong> <span id="trainName">...</span></p>
+    <p><strong>Number:</strong> <span id="trainNumber">...</span></p>
+    <p><strong>Status:</strong> <span id="trainStatus">...</span></p>
+    <p><strong>Location:</strong> <span id="trainLocation">...</span></p>
+  </div>
+
+  
+  <div class="card">
+    <h2>Barrigate Status</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Barrigate ID</th>
+          <th>Status</th>
+          <th>Next Open Time</th>
+        </tr>
+      </thead>
+      <tbody id="fatakTableBody"></tbody>
+    </table>
+  </div>
+
+  
+  <div class="card">
+    <h2>All Trains</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Train Name</th>
+          <th>Train No.</th>
+          <th>Status</th>
+          <th>Latitude</th>
+          <th>Longitude</th>
+        </tr>
+      </thead>
+      <tbody id="trainTableBody"></tbody>
+    </table>
+  </div>
+
+  
+  <script id="dashboardData" type="application/json">
+    {
+      "featured_train": {
+        "train_name": "Gatimaan Express",
+        "train_number": "12050",
+        "status": "On Time",
+        "current_location": {
+          "lat": 26.4478,
+          "lng": 78.5699
+        }
+      },
+      "all_trains": [
+        {
+          "train_name": "Gatimaan Express",
+          "train_number": "12050",
+          "status": "On Time",
+          "lat": 26.4478,
+          "lng": 78.5699
+        },
+        {
+          "train_name": "Shatabdi Express",
+          "train_number": "12001",
+          "status": "Delayed",
+          "lat": 26.7382,
+          "lng": 78.9345
+        },
+        {
+          "train_name": "Rajdhani Express",
+          "train_number": "12431",
+          "status": "Cancelled",
+          "lat": 25.4561,
+          "lng": 77.8912
+        }
+      ],
+      "fatak_status": [
+        {
+          "fatak_id": "F-101",
+          "status": "Closed",
+          "next_open": "12:45 PM"
+        },
+        {
+          "fatak_id": "F-102",
+          "status": "Open",
+          "next_open": "Currently Open"
+        }
+      ]
+    }
+  </script>
+  <script src="script.js"></script>
+
+  
+  <!-- <script>
+    const data = JSON.parse(document.getElementById("dashboardData").textContent);
+
+    
+    const map = L.map('map').setView([26.4478, 78.5699], 8); 
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    
+    data.all_trains.forEach(train => {
+      L.marker([train.lat, train.lng])
+        .addTo(map)
+        .bindPopup(`<b>${train.train_name}</b><br>Train No: ${train.train_number}<br>Status: ${train.status}`)
+        .openPopup();
+    });
+
+    
+    const ft = data.featured_train;
+    document.getElementById("trainName").textContent = ft.train_name;
+    document.getElementById("trainNumber").textContent = ft.train_number;
+    document.getElementById("trainStatus").textContent = ft.status;
+    document.getElementById("trainLocation").textContent = `Lat: ${ft.current_location.lat}, Lng: ${ft.current_location.lng}`;
+
+    
+    const trainTable = document.getElementById("trainTableBody");
+    data.all_trains.forEach(train => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${train.train_name}</td>
+        <td>${train.train_number}</td>
+        <td>${train.status}</td>
+        <td>${train.lat}</td>
+        <td>${train.lng}</td>
+      `;
+      trainTable.appendChild(row);
+    });
+
+    
+    const fatakTable = document.getElementById("fatakTableBody");
+    data.fatak_status.forEach(fatak => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${fatak.fatak_id}</td>
+        <td class="${fatak.status === 'Open' ? 'status-open' : 'status-closed'}">${fatak.status}</td>
+        <td>${fatak.next_open}</td>
+      `;
+      fatakTable.appendChild(row);
+    });
+  </script> -->
+
+</body>
+</html>
